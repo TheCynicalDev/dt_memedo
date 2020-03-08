@@ -568,8 +568,8 @@
     <!-- Flag indicating whether we should enable smart battery. -->
     <bool name="config_smart_battery_available">true</bool>
 
-    <!-- Component name for default assistant on this device -->
-    <string name="config_defaultAssistantComponentName">com.google.android.googlequicksearchbox/com.google.android.voiceinteraction.GsaVoiceInteractionService</string>
+    <!-- The name of the package that will hold the assistant role by default. -->
+    <string name="config_defaultAssistant" translatable="false">com.google.android.googlequicksearchbox</string>
 
     <!-- Whether to cleanup fingerprints upon connection to the daemon and when user switches -->
     <bool name="config_cleanupUnusedFingerprints">false</bool>
