@@ -1,9 +1,9 @@
 [ 
   { 
     "remote": "github", 
-    "repository": "Rafiester/kernel_xiaomi_msm8953-3.18", 
+    "repository": "dracarys18/NotKernel", 
     "target_path": "kernel/xiaomi/mido", 
-    "branch": "ten"
+    "branch": "10-stable"
   },
 
   {
