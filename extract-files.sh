@@ -19,16 +19,15 @@
 set -e
 
 DEVICE=mido
-DEVICE_COMMON=msm8953-common
 VENDOR=xiaomi
 
 # Load extract_utils and do some sanity checks
 MY_DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$MY_DIR" ]]; then MY_DIR="$PWD"; fi
 
-AOSP_ROOT="$MY_DIR"/../../..
+LINEAGE_ROOT="$MY_DIR"/../../..
 
-HELPER="$AOSP_ROOT"/vendor/aosp/build/tools/extract_utils.sh
+HELPER="$LINEAGE_ROOT"/vendor/aosp/build/tools/extract_utils.sh
 if [ ! -f "$HELPER" ]; then
     echo "Unable to find helper script at $HELPER"
     exit 1
@@ -57,29 +56,19 @@ if [ -z "$SRC" ]; then
 fi
 
 # Initialize the helper
-setup_vendor "$DEVICE_COMMON" "$VENDOR" "$AOSP_ROOT" true "$CLEAN_VENDOR"
+setup_vendor "$DEVICE" "$VENDOR" "$LINEAGE_ROOT" false "$CLEAN_VENDOR"
 
-extract "$MY_DIR"/proprietary-files-qc.txt "$SRC" "$SECTION"
+extract "$MY_DIR"/proprietary-files.txt "$SRC" "$SECTION"
 
-if [ -s "$MY_DIR"/proprietary-files.txt ]; then
-    # Reinitialize the helper for device
-    setup_vendor "$DEVICE" "$VENDOR" "$AOSP_ROOT" false "$CLEAN_VENDOR"
+DEVICE_BLOB_ROOT="$LINEAGE_ROOT"/vendor/"$VENDOR"/"$DEVICE"/proprietary
 
-    extract "$MY_DIR"/proprietary-files.txt "$SRC" "$SECTION"
+# Camera configs
+sed -i "s|/system/etc/camera|/vendor/etc/camera|g" "$DEVICE_BLOB_ROOT"/vendor/lib/libmmcamera2_sensor_modules.so
 
-    DEVICE_BLOB_ROOT="$AOSP_ROOT"/vendor/"$VENDOR"/"$DEVICE"/proprietary
+# Camera socket
+sed -i "s|/data/misc/camera/cam_socket|/data/vendor/qcam/cam_socket|g" "$DEVICE_BLOB_ROOT"/vendor/bin/mm-qcamera-daemon
 
-    sed -i \
-        's/\/system\/etc\//\/vendor\/etc\//g' \
-        "$DEVICE_BLOB_ROOT"/vendor/lib/libmmcamera2_sensor_modules.so
-
-    sed -i \
-         "s|/data/misc/camera/cam_socket|/data/vendor/qcam/cam_socket|g" \
-         "$DEVICE_BLOB_ROOT"/vendor/bin/mm-qcamera-daemon
-
-    sed -i \
-         "s|persist.camera.debug.logfile|persist.vendor.camera.dbglog|g" \
-         "DEVICE_BLOB_ROOT"/vendor/lib/libmmcamera_dbg.so
-fi
+# Camera debug log file
+sed -i "s|persist.camera.debug.logfile|persist.vendor.camera.dbglog|g" "$DEVICE_BLOB_ROOT"/vendor/lib/libmmcamera_dbg.so
 
 "$MY_DIR"/setup-makefiles.sh
